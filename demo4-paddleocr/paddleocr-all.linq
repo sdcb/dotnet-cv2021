@@ -15,7 +15,7 @@ async Task Main()
 {
 	await PaddleOcrHelper.SetupAsync(QueryCancelToken);
 	using PaddleOcrAll all = new();
-	using Mat src = Cv2.ImRead(@"C:\Users\ZhouJie\Pictures\v2-0d9bc7b0c7cb45e657636ffd1dd4ae29_r.jpg");
+	using Mat src = Cv2.ImRead(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyPictures), "xdr5480.jpg"));
 
 	Image(src).Dump();
 	all.Run(src).Text.Dump();

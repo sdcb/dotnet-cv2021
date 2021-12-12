@@ -11,24 +11,24 @@
 void Main()
 {
 	Environment.CurrentDirectory = Util.GetPassword("dotnet2021-cv-zhoujie-demo1");
-
+	
 	foreach (string path in Directory.EnumerateFiles(@".\resources", "*.png"))
 	{
 		using Mat src = Cv2.ImRead(path);
 		using Mat mainSrc = src[GetMainArea(src)];
 		using Mat l50 = MtfLines.L50.GetBinary(mainSrc);
 		l50.GetRectangularArray(out byte[,] data);
-
+		
 		int width = data.GetLength(1);
 		int height = data.GetLength(0);
 		var result = Enumerable.Range(0, 10)
 			.Select(x => x * width / 10)
 			.Select(x => GetFirstWhite(data, x))
-			.Select(x => new
-			{
-				y1 = Math.Round(100 - 100.0 * x.y1 / height, 2),
-				y2 = Math.Round(100 - 100.0 * x.y2 / height, 2)
-			});
+			.Select(x => 
+			(
+				y1: Math.Round(100 - 100.0 * x.y1 / height, 2),
+				y2: Math.Round(100 - 100.0 * x.y2 / height, 2)
+			));
 			
 		using Mat clone = src.Clone();
 		

@@ -31,7 +31,6 @@ public record PaddleOcrKnownModels(Uri DetectionModelUri, Uri ClassifierModelUri
 			{
 				Console.WriteLine($"Downloading {prefix} model from {uri}");
 				await PaddleOcrHelper.DownloadFile(uri, localTarFile, cancellationToken);
-				
 			}
 
 			Console.WriteLine($"Extracting {localTarFile} to {directory}");

@@ -11,8 +11,8 @@
 
 async Task Main()
 {
-	Environment.CurrentDirectory = Util.GetPassword("dotnet2021-cv-zhoujie-demo2");
-	await TesseractHelper.Fast.EnsureTrainedData(new[] { "chi_sim", "eng" }, QueryCancelToken);
+	Environment.CurrentDirectory = Util.GetPassword("dotnet2021-cv-zhoujie-demo3");
+	await TesseractHelper.Best.EnsureTrainedData(new[] { "chi_sim", "eng" }, QueryCancelToken);
 	
 	using var ocr = new TableOCR();
 	foreach (string file in Directory.EnumerateFiles(@".\resources", "*.jpg").OrderBy(x => x).Take(1))
@@ -20,8 +20,7 @@ async Task Main()
 		using Mat src = Cv2.ImRead(file);
 		Mat[,] matTable = GetMatTable(src);
 		Mat[,] scaledMat = Scale(matTable, 2, 2);
-		Image(scaledMat).Dump();
-		ocr.Process(scaledMat).Dump();
+		Util.HorizontalRun(false, Image(src), ocr.Process(scaledMat)).Dump();
 	}
 }
 

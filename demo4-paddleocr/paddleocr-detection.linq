@@ -11,7 +11,8 @@
 void Main()
 {
 	using PaddleOcrDetector detector = new(@"C:\_\3rd\paddle\models\ppocr-v2\det");
-	using Mat src = Cv2.ImDecode(GetClipboardImage(), ImreadModes.Color);
+	//using Mat src = Cv2.ImDecode(GetClipboardImage(), ImreadModes.Color);
+	using Mat src = Cv2.ImRead(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyPictures), "xdr5480.jpg"));
 	Rect[] rects = detector.Run(src);
 	Image(PaddleOcrDetector.Visualize(src, rects, Scalar.Red, thickness: 2)).Dump();
 

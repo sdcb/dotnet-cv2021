@@ -7,36 +7,27 @@
 void Main()
 {
 	Environment.CurrentDirectory = Util.GetPassword("dotnet2021-cv-zhoujie-demo2");
-	using Mat src = Cv2.ImRead(@".\resources\00.jpg");
-	Mat[,] matTable = GetMatTable(src, debug: true);
-	Image(matTable).Dump();
+	using Mat src = Cv2.ImRead(@".\resources\sharpness-2021-12-03.jpg");
+	var matTable = GetMatTable(src, debug: false);
+	Util.HorizontalRun(false, Image(matTable)).Dump();
+	//var matTable = GetMatTable(src, debug: false);
+	//Util.HorizontalRun(false, Image(matTable.left), Image(matTable.middle), Image(matTable.right)).Dump();
 }
 
 Mat[,] GetMatTable(Mat src, bool debug = false, string debugTitle = null)
 {
 	using Mat gray = src.CvtColor(ColorConversionCodes.RGB2GRAY);
-	using Mat binaryInv = gray.Threshold(100, 255, ThresholdTypes.BinaryInv);
+	using Mat binaryInv = gray.Threshold(120, 255, ThresholdTypes.BinaryInv);
+	using Mat binary = ~binaryInv;
 
 	double[] colBlacks = GetBlacks(binaryInv, ReduceDimension.Row);
-	double[] rowBlacks = GetBlacks(binaryInv, ReduceDimension.Column);
+	int[] cols = CellSpan.Scan(colBlacks, threshold: 0.9).Select(x => x.Center).ToArray();
+
+	using Mat half = binaryInv[0, binaryInv.Rows, cols[3], cols.Last()];
+	double[] rowBlacks = GetBlacks(half, ReduceDimension.Column);
 	int[] rows = CellSpan.Scan(rowBlacks, threshold: 0.9).Select(x => x.Center).ToArray();
-	int[] cols = CellSpan.Scan(colBlacks, threshold: 0.8).Select(x => x.Center).ToArray();
-	if (debug)
-	{
-		using Mat demo = binaryInv.CvtColor(ColorConversionCodes.GRAY2RGB);
-		Size size = demo.Size();
-		foreach (int row in rows)
-		{
-			demo.Line(0, row, size.Width, row, Scalar.Red);
-		}
-		foreach (int col in cols)
-		{
-			demo.Line(col, 0, col, size.Height, Scalar.Red);
-		}
-		Image(demo).Dump();
-	}
+
 	var table = new Mat[rows.Length - 1, cols.Length - 1];
-	using Mat binary = ~binaryInv;
 	for (int yi = 0; yi < rows.Length - 1; ++yi)
 	{
 		for (int xi = 0; xi < cols.Length - 1; ++xi)
@@ -45,6 +36,38 @@ Mat[,] GetMatTable(Mat src, bool debug = false, string debugTitle = null)
 		}
 	}
 	return table;
+}
+
+(Mat[,] left, Mat[,] middle, Mat[,] right) GetMatTable2(Mat src, bool debug = false, string debugTitle = null)
+{
+	using Mat gray = src.CvtColor(ColorConversionCodes.RGB2GRAY);
+	using Mat binaryInv = gray.Threshold(120, 255, ThresholdTypes.BinaryInv);
+	using Mat binary = ~binaryInv;
+
+	double[] colBlacks = GetBlacks(binaryInv, ReduceDimension.Row);
+	int[] cols = CellSpan.Scan(colBlacks, threshold: 0.9).Select(x => x.Center).ToArray();
+	
+	Mat[,] GetTableFromCols(int[] cols, int colFrom, int colTo)
+	{
+		using Mat half = binaryInv[0, binaryInv.Rows, cols[colFrom], cols[colTo]];
+		double[] rowBlacks = GetBlacks(half, ReduceDimension.Column);
+		int[] rows = CellSpan.Scan(rowBlacks, threshold: 0.9).Select(x => x.Center).ToArray();
+
+		var table = new Mat[rows.Length - 1, colTo - colFrom];
+		for (int yi = 0; yi < rows.Length - 1; ++yi)
+		{
+			for (int xi = colFrom; xi < colTo; ++xi)
+			{
+				table[yi, xi - colFrom] = binary[rows[yi] + 1, rows[yi + 1], cols[xi] + 1, cols[xi + 1]];
+			}
+		}
+		return table;
+	}
+	
+	return (
+		GetTableFromCols(cols, 0, 2), 
+		GetTableFromCols(cols, 2, 3),
+		GetTableFromCols(cols, 3, cols.Length - 1));
 }
 
 static double[] GetBlacks(Mat src, ReduceDimension dimension)

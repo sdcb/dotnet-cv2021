@@ -6,11 +6,11 @@
 </Query>
 
 #load ".\01_detect-table"
-#load "..\demo3-paddleocr\paddleocr"
-#load "..\demo3-paddleocr\paddleocr-setup"
-#load "..\demo3-paddleocr\paddleocr-all"
-#load "..\demo3-paddleocr\paddleocr-detection"
-#load "..\demo3-paddleocr\paddleocr-recognition"
+#load "..\demo4-paddleocr\paddleocr"
+#load "..\demo4-paddleocr\paddleocr-setup"
+#load "..\demo4-paddleocr\paddleocr-all"
+#load "..\demo4-paddleocr\paddleocr-detection"
+#load "..\demo4-paddleocr\paddleocr-recognition"
 
 async Task Main()
 {
@@ -18,12 +18,17 @@ async Task Main()
 	await PaddleOcrHelper.SetupAsync(QueryCancelToken);
 	
 	using var ocr = new TableOCR();
-	foreach (string file in Directory.EnumerateFiles(@".\resources", "*.jpg"))
+	foreach (string file in Directory.EnumerateFiles(@".\resources", "*.jpg").OrderBy(x => x).Take(1))
 	{
+		if (QueryCancelToken.IsCancellationRequested)
+		{
+			break;
+		}
+		
 		using Mat src = Cv2.ImRead(file);
 		Mat[,] matTable = GetMatTable(src);
-		Mat[,] scaledMat = Scale(matTable, 2, 2);
-		Util.HorizontalRun(false, Image(scaledMat), ocr.Process(scaledMat)).Dump(file);
+		Mat[,] scaled = Scale(matTable, 2.0, 2.0);
+		Util.HorizontalRun(false, Image(matTable), ocr.Process(scaled, QueryCancelToken)).Dump();
 	}
 }
 
@@ -45,13 +50,12 @@ Mat[,] Scale(Mat[,] src, double fx, double fy)
 public class TableOCR : IDisposable
 {
 	PaddleOcrAll _eng = new (PaddleOcrHelper.EnPPOcrMobileV2.RootDirectory, PaddleOcrHelper.PaddleOcrENKeys);
-	PaddleOcrAll _chs = new (PaddleOcrHelper.PPOcrV2.RootDirectory, PaddleOcrHelper.PaddleOcrKeys);
 	
 	public TableOCR()
 	{
 	}
 	
-	public string[,] Process(Mat[,] src)
+	public string[,] Process(Mat[,] src, CancellationToken cancellationToken = default)
 	{
 		int rows = src.GetLength(0);
 		int cols = src.GetLength(1);
@@ -61,17 +65,14 @@ public class TableOCR : IDisposable
 		{
 			for (int x = 0; x < cols; ++x)
 			{
+				if (cancellationToken.IsCancellationRequested)
+				{
+					break;
+				}
+				
 				using Mat cell = src[y, x];
-				if (y > 0 && (x == 3 || x == 4))
-				{
-					var r = _eng.Run(cell);
-					result[y, x] = r.Text;
-				}
-				else
-				{
-					var r = _chs.Run(cell);
-					result[y, x] = r.Text;
-				}
+				var r = _eng.Run(cell);
+				result[y, x] = r.Text;
 			}
 		}
 		return result;
