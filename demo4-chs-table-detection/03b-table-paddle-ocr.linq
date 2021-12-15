@@ -6,15 +6,15 @@
 </Query>
 
 #load ".\01_detect-table"
-#load "..\demo4-paddleocr\paddleocr"
-#load "..\demo4-paddleocr\paddleocr-setup"
-#load "..\demo4-paddleocr\paddleocr-all"
-#load "..\demo4-paddleocr\paddleocr-detection"
-#load "..\demo4-paddleocr\paddleocr-recognition"
+#load "..\demo3-paddleocr\paddleocr"
+#load "..\demo3-paddleocr\paddleocr-setup"
+#load "..\demo3-paddleocr\paddleocr-all"
+#load "..\demo3-paddleocr\paddleocr-detection"
+#load "..\demo3-paddleocr\paddleocr-recognition"
 
 async Task Main()
 {
-	Environment.CurrentDirectory = Util.GetPassword("dotnet2021-cv-zhoujie-demo3");
+	Environment.CurrentDirectory = Util.GetPassword("dotnet2021-cv-zhoujie-demo4");
 	await PaddleOcrHelper.SetupAsync(QueryCancelToken);
 	
 	using var ocr = new TableOCR();

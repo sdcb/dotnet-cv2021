@@ -110,7 +110,7 @@ Mat PerspectiveCorrectAgain(Mat src)
 	//using Mat demo = src.Clone();
 	//demo.DrawContours(new []{ originRect }, -1, Scalar.Red);
 	//Image(demo).Dump();
-	return src.WarpPerspective(transform, binary.Size());
+	return src.WarpPerspective(transform, binary.Size(), InterpolationFlags.Area);
 }
 
 CellSpan[] GetControlCols(Mat binary, CellSpan controlRow)

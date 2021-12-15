@@ -6,7 +6,7 @@
 
 void Main()
 {
-	Environment.CurrentDirectory = Util.GetPassword("dotnet2021-cv-zhoujie-demo3");
+	Environment.CurrentDirectory = Util.GetPassword("dotnet2021-cv-zhoujie-demo4");
 	using Mat src = Cv2.ImRead(@".\resources\24.jpg");
 	Mat[,] matTable = GetMatTable(src, debug: true);
 	Image(matTable).Dump();

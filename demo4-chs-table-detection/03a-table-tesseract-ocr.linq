@@ -11,7 +11,7 @@
 
 async Task Main()
 {
-	Environment.CurrentDirectory = Util.GetPassword("dotnet2021-cv-zhoujie-demo3");
+	Environment.CurrentDirectory = Util.GetPassword("dotnet2021-cv-zhoujie-demo4");
 	await TesseractHelper.Best.EnsureTrainedData(new[] { "chi_sim", "eng" }, QueryCancelToken);
 	
 	using var ocr = new TableOCR();

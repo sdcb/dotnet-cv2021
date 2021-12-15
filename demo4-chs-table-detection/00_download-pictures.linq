@@ -21,8 +21,8 @@ async Task Main()
 		.Select((x, i) => (x, i))
 		.ToArray();
 
-	Util.SetPassword("dotnet2021-cv-zhoujie-demo3", Util.CurrentQuery.Location);
-	Environment.CurrentDirectory = Util.GetPassword("dotnet2021-cv-zhoujie-demo3");
+	Util.SetPassword("dotnet2021-cv-zhoujie-demo4", Util.CurrentQuery.Location);
+	Environment.CurrentDirectory = Util.GetPassword("dotnet2021-cv-zhoujie-demo4");
 	Directory.CreateDirectory("./resources");
 	File.WriteAllText("./resources/.gitignore", "*.jpg");
 	await Parallel.ForEachAsync(imageUrls, QueryCancelToken, async (url, ct) =>
