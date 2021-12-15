@@ -18,7 +18,7 @@ async Task Main()
 	await PaddleOcrHelper.SetupAsync(QueryCancelToken);
 	
 	using var ocr = new TableOCR();
-	foreach (string file in Directory.EnumerateFiles(@".\resources", "*.jpg").OrderBy(x => x))
+	foreach (string file in Directory.EnumerateFiles(@".\resources", "*.jpg").OrderBy(x => x).Take(1))
 	{
 		if (QueryCancelToken.IsCancellationRequested) break;
 		

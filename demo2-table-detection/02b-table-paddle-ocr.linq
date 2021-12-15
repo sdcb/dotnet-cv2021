@@ -26,9 +26,13 @@ async Task Main()
 		}
 		
 		using Mat src = Cv2.ImRead(file);
-		Mat[,] matTable = GetMatTable(src);
-		Mat[,] scaled = Scale(matTable, 2.0, 2.0);
-		Util.HorizontalRun(false, Image(matTable), ocr.Process(scaled, QueryCancelToken)).Dump();
+		//Mat[,] matTable = GetMatTable(src);
+		//Mat[,] scaled = Scale(matTable, 2.0, 2.0);
+		//Util.HorizontalRun(false, Image(src), ocr.Process(scaled, QueryCancelToken)).Dump();
+
+		MatRow[] matTables = GetMatTable2(src).ToArray();
+		ResultRow[] result = ocr.Process(matTables, QueryCancelToken);
+		Util.HorizontalRun(false, Image(src), ResultRow.Visualize(result)).Dump();
 	}
 }
 
@@ -76,6 +80,37 @@ public class TableOCR : IDisposable
 			}
 		}
 		return result;
+	}
+
+	public ResultRow[] Process(MatRow[] src, CancellationToken cancellationToken = default, int level = 0)
+	{
+		return src.Select((r, y) =>
+		{
+			string[] texts = r.ColumnMats
+				.Select((m, mi) =>
+				{
+					if (cancellationToken.IsCancellationRequested) return null;
+					int x = level switch
+					{
+						0 => mi,
+						1 => mi + 2,
+						2 => mi + 3,
+						_ => throw new NotSupportedException()
+					};
+
+					double scaledRate = (y, x) switch
+					{
+						_ => 2,
+					};
+
+					using Mat scaled = m.Resize(Size.Zero, scaledRate, scaledRate);
+					var r = _eng.Run(scaled);
+					return r.Text;
+				})
+				.ToArray();
+
+			return new ResultRow(texts, Process(r.ChildRows, cancellationToken, level + 1));
+		}).ToArray();
 	}
 
 	public void Dispose()

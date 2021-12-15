@@ -15,10 +15,11 @@ async Task Main()
 {
 	await PaddleOcrHelper.SetupAsync(QueryCancelToken);
 	using PaddleOcrAll all = new();
-	using Mat src = Cv2.ImRead(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyPictures), "xdr5480.jpg"));
+	//using Mat src = Cv2.ImRead(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyPictures), "xdr5480.jpg"));
+	using Mat src = Cv2.ImDecode(GetClipboardImage(), ImreadModes.Color);
+	using Mat scaled = src.Resize(Size.Zero, 1, 1);
 
-	Image(src).Dump();
-	all.Run(src).Text.Dump();
+	Util.HorizontalRun(false, Image(scaled), all.Run(scaled).Text).Dump();
 
 	object Image(Mat src) => Util.Image(src.ToBytes(), Util.ScaleMode.Unscaled);
 
